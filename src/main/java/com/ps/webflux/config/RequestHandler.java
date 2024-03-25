@@ -1,6 +1,8 @@
 package com.ps.webflux.config;
 
+import com.ps.webflux.dto.MultiplyRequestDTO;
 import com.ps.webflux.dto.Response;
+import com.ps.webflux.exception.InputValidationException;
 import com.ps.webflux.service.ReactiveMathService;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,17 @@ public class RequestHandler {
         return  ServerResponse.ok().contentType(MediaType.TEXT_EVENT_STREAM).body(reactiveMathService.multiplicationTable(getInputValue(serverRequest)),Response.class);
     }
 
+    public Mono<ServerResponse> multiply(ServerRequest serverRequest){
+        return  ServerResponse.ok().contentType(MediaType.TEXT_EVENT_STREAM).body(reactiveMathService.findMultiplication(serverRequest.bodyToMono(MultiplyRequestDTO.class)),Response.class);
+    }
+
+    public Mono<ServerResponse> squareHandlerWithValidation(ServerRequest serverRequest){
+        int value = getInputValue(serverRequest);
+        if(value <10 || value>20 ){
+            return Mono.error(new InputValidationException(value));
+        }
+        return ServerResponse.ok().body(reactiveMathService.findSquere(value), Response.class);
+    }
     int getInputValue(ServerRequest serverRequest){
         return Integer.valueOf(serverRequest.pathVariable("input"));
     }
